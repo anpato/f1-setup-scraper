@@ -13,10 +13,6 @@ module.exports = {
         unique: true,
         allowNull: false
       },
-      forumLink: {
-        type: Sequelize.TEXT,
-        field: 'forum_link'
-      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

@@ -6,35 +6,35 @@ async function main() {
   const page = await request()
   const [trackData] = scraper(page)
   await insertTracks(trackData)
-  await Promise.all(
-    trackData.map(async (track) => {
-      let tmp = await request(track.link)
+  // await Promise.all(
+  //   trackData.map(async (track) => {
+  //     let tmp = await request(track.link)
 
-      let types = selectSetupType(tmp)
-      await insertSetupTypes(types)
-      new Promise((resolve) => setTimeout(resolve, 3000))
-      await Promise.all(
-        types.map(async (t) => {
-          let res = await request(t.link)
-          let model = await GrandPrix.findOne({
-            where: { name: t.grandPrix },
-            raw: true
-          })
-          //   console.log(model.id)
-          if (model) {
-            let type = await SetupType.findOne({
-              where: { gpId: model.id, setupType: t.type },
-              raw: true
-            })
+  //     let types = selectSetupType(tmp)
+  //     await insertSetupTypes(types)
+  //     new Promise((resolve) => setTimeout(resolve, 3000))
+  //     await Promise.all(
+  //       types.map(async (t) => {
+  //         let res = await request(t.link)
+  //         let model = await GrandPrix.findOne({
+  //           where: { name: t.grandPrix },
+  //           raw: true
+  //         })
+  //         //   console.log(model.id)
+  //         if (model) {
+  //           let type = await SetupType.findOne({
+  //             where: { gpId: model.id, setupType: t.type },
+  //             raw: true
+  //           })
 
-            let setups = getSetups(res, model.id, type.id)
-            await Setup.bulkCreate(setups, { ignoreDuplicates: true })
-          }
-          new Promise((resolve) => setTimeout(resolve, 3000))
-        })
-      )
-    })
-  )
+  //           let setups = getSetups(res, model.id, type.id)
+  //           await Setup.bulkCreate(setups, { ignoreDuplicates: true })
+  //         }
+  //         new Promise((resolve) => setTimeout(resolve, 3000))
+  //       })
+  //     )
+  //   })
+  // )
 
   return true
 }

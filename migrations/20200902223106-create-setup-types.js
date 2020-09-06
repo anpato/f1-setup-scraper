@@ -9,12 +9,8 @@ module.exports = {
         defaultValue: Sequelize.UUIDV4
       },
       setupType: {
-        type: Sequelize.STRING,
+        type: Sequelize.ENUM(['Wet', 'Dry']),
         field: 'setup_type'
-      },
-      url: {
-        type: Sequelize.TEXT,
-        unqiue: true
       },
       gpId: {
         field: 'gp_id',

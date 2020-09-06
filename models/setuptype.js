@@ -24,12 +24,8 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: DataTypes.UUIDV4
       },
       setupType: {
-        type: DataTypes.STRING,
+        type: DataTypes.ENUM(['wet', 'dry']),
         field: 'setup_type'
-      },
-      url: {
-        type: DataTypes.TEXT,
-        unique: true
       },
       gpId: {
         field: 'gp_id',

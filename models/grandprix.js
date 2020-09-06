@@ -18,10 +18,6 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         unique: true,
         allowNull: false
-      },
-      forumLink: {
-        type: DataTypes.TEXT,
-        field: 'forum_link'
       }
     },
     {
