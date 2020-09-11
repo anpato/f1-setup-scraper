@@ -1,9 +1,6 @@
 const axios = require('axios')
 const cheerio = require('cheerio')
-const slugify = require('slugify')
-const { GrandPrix, Setup, Team } = require('./db/models')
-const Stack = require('./utils/Stack')
-const fs = require('fs')
+const { GrandPrix, Setup, Team } = require('../db/models')
 const { Op } = require('sequelize')
 async function main() {
   const page = await request('https://simracingsetup.com/setups/f1-2020/')
