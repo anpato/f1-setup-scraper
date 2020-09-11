@@ -27,12 +27,10 @@ async function getImages(data) {
       teamCar
     })
   })
-  console.log(teamData)
-  await Team.bulkCreate(teamData)
+  await Team.bulkCreate([...teamData, { teamName: 'Multiplayer' }])
 }
 
 async function main() {
-  // await loadBrowser()
   let results = await request('https://www.formula1.com/en/teams.html')
   await getImages(results)
 }
