@@ -218,14 +218,7 @@ module.exports = {
         },
         type: Sequelize.UUID
       },
-      typeId: {
-        field: 'type_id',
-        references: {
-          model: 'setup_types',
-          key: 'id'
-        },
-        type: Sequelize.UUID
-      },
+
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

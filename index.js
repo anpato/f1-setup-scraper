@@ -1,178 +1,183 @@
 const axios = require('axios')
 const cheerio = require('cheerio')
 const slugify = require('slugify')
-const { GrandPrix, SetupType, Setup } = require('./models')
+const { GrandPrix, Setup, Team } = require('./db/models')
+const Stack = require('./utils/Stack')
+const fs = require('fs')
+const { Op } = require('sequelize')
 async function main() {
-  const page = await request()
-  const [trackData] = scraper(page)
-  await insertTracks(trackData)
-  // await Promise.all(
-  //   trackData.map(async (track) => {
-  //     let tmp = await request(track.link)
+  const page = await request('https://simracingsetup.com/setups/f1-2020/')
+  const { data, links } = LoadGp(page)
+  await GrandPrix.bulkCreate(data, { ignoreDuplicates: true })
+  let preparedSetupData = []
+  for (let i = 0; i < links.length; i++) {
+    const link = links[i]
+    let location = data[i].name
+    let linkData = await request(link)
+    await new Promise((resolve) => setTimeout(resolve, 2000))
+    let setupLinks = PrepareSetupLinks(linkData)
 
-  //     let types = selectSetupType(tmp)
-  //     await insertSetupTypes(types)
-  //     new Promise((resolve) => setTimeout(resolve, 3000))
-  //     await Promise.all(
-  //       types.map(async (t) => {
-  //         let res = await request(t.link)
-  //         let model = await GrandPrix.findOne({
-  //           where: { name: t.grandPrix },
-  //           raw: true
-  //         })
-  //         //   console.log(model.id)
-  //         if (model) {
-  //           let type = await SetupType.findOne({
-  //             where: { gpId: model.id, setupType: t.type },
-  //             raw: true
-  //           })
-
-  //           let setups = getSetups(res, model.id, type.id)
-  //           await Setup.bulkCreate(setups, { ignoreDuplicates: true })
-  //         }
-  //         new Promise((resolve) => setTimeout(resolve, 3000))
-  //       })
-  //     )
-  //   })
-  // )
-
+    for (let j = 0; j < setupLinks.length; j++) {
+      const setupLink = setupLinks[j]
+      const setupData = await ParseSetupData(setupLink.link, request, location)
+      preparedSetupData.push({
+        location,
+        team: setupLink.teamName,
+        data: setupData,
+        type: setupLink.type
+      })
+    }
+  }
+  await prepareSetups(preparedSetups)
   return true
 }
-async function insertTracks(trackData) {
-  let formattedTrackData = trackData.map((t) => ({
-    name: t.grand_prix,
-    forumLink: t.link
-  }))
-  return await GrandPrix.bulkCreate(formattedTrackData, {
-    ignoreDuplicates: true
-  })
-}
 
-function getSetups(page, currentTrack, type) {
-  const $ = cheerio.load(page)
-  let options = $('script').filter(
-    (i, el) => el.attribs['type'] && el.attribs['type'].includes('json')
+async function prepareSetups(data) {
+  let sets = data
+  sets.forEach((d, index) => {
+    let r = d.data
+    let keys = Object.keys(r)
+    let values = Object.values(r)
+    let results = {}
+    keys.forEach((k, i) => {
+      if (k === 'brake_bias') {
+        k = 'front_brake_bias'
+      }
+      results[camelize(k.replace('_aero', ''), '_')] = values[i]
+    })
+    sets[index].data = results
+  })
+
+  const setups = await Promise.all(
+    sets.map(async (d) => {
+      let team = await Team.findOne({
+        where: { teamName: { [Op.iLike]: `%${d.team.trim()}%` } },
+        raw: true
+      })
+      let gp = await GrandPrix.findOne({
+        where: { name: { [Op.iLike]: `%${d.location.trim()}%` } },
+        raw: true
+      })
+      return { ...d.data, gpId: gp.id, teamId: team.id, conditions: d.type }
+    })
   )
-  let setupData = []
-  options.each((i, js) => {
-    js.children.filter((el, index) => {
-      let values = JSON.parse(el.data)
-      let base = values.text
+  await Setup.bulkCreate(setups, { ignoreDuplicates: true })
+}
 
-      if (base) {
-        let baseSetup = parseSetupData(base, type)
-        setupData.push({ data: baseSetup, gpId: currentTrack, typeId: type })
-      }
+function capitalize(word) {
+  return `${word.slice(0, 1).toUpperCase()}${word.slice(1).toLowerCase()}`
+}
+function camelize(text, seperator) {
+  if (typeof seperator === undefined) return text
+  const words = text.split(seperator)
+  const result = [words[0]]
+  words.slice(1).forEach((word) => result.push(capitalize(word)))
+  return result.join('')
+}
 
-      let comments = values.comment
-      if (comments) {
-        comments.forEach((c) => {
-          if (c.text.toLowerCase().includes('team')) {
-            setupData.push({
-              data: parseSetupData(c.text),
-              gpId: currentTrack,
-              typeId: type
-            })
-          }
-        })
-      }
+function LoadGp(page) {
+  const $ = cheerio.load(page)
+  let links = []
+  let gpData = []
+  $('a.car-setup-archive-box').each((i, el) => {
+    let trackTitle = $(el).find('.track-title').text()
+    let gpName = $(el).find('.track-subtitle').text().replace('2020', '')
+    let gpFlag = $(el).find('.listing-info img')[0].attribs['data-lazy-src']
+    links.push(el.attribs['href'])
+    gpData.push({
+      name: gpName.trim(),
+      location: trackTitle,
+      locationFlag: gpFlag
     })
   })
-  return setupData.filter((data) => data.data.length)
+  return { data: gpData, links }
 }
 
-function parseSetupData(data, typeId) {
-  let parseBull = data.split('\n')
-  let tIndex = parseBull
-    .map((str, j) => {
-      let rawStr = str.replace('\t', '').trim()
-      return rawStr
-    })
-    .filter((str) => str)
-    .map((str) => {
-      let obj = {}
-      if (str.includes(':')) {
-        let values = str.replace(':', '*').split('*')
-        let objKey = values[0]
-        let value = values[1].trim()
-        if (objKey.length <= 20) {
-          obj[
-            slugify(objKey, { replacement: '_', lower: true }).replace('-', '_')
-          ] = {
-            value,
-            key: objKey
-          }
-          return obj
+function PrepareSetupLinks(page) {
+  let setupLinks = []
+  const $ = cheerio.load(page)
+  $('.row ul li a').each((i, el) => {
+    let obj = {}
+    let link = el.attribs['href']
+    let str = link.replace('prix-2020-', '*').split('*')
+
+    let teamName
+    switch (true) {
+      case link.includes('wet'):
+        teamName = parseTeamNames(str[1].replace('-wet', '*').split('*')[0])
+        obj = {
+          teamName,
+          type: 'wet',
+          link
         }
-      }
-    })
-    .filter((obj) => obj)
-  return Object.values(tIndex)
+        break
+      default:
+        teamName = parseTeamNames(str[1].replace('-dry', '*').split('*')[0])
+        obj = {
+          teamName,
+          type: 'dry',
+          link: link
+        }
+        break
+    }
+    setupLinks.push(obj)
+  })
+  return setupLinks
+}
+function parseTeamNames(str) {
+  let name = str.split('-').join(' ')
+  if (!name.includes(' ')) {
+    return name.charAt(0).toUpperCase() + name.slice(1)
+  }
+
+  let newStr = ''
+  str
+    .split('-')
+    .forEach((c) => (newStr += ` ${c.charAt(0).toUpperCase() + c.slice(1)}`))
+  return newStr.trim()
 }
 
-async function insertSetupTypes(setupTypes) {
-  const options = await buildSetupOptions(setupTypes)
-  await SetupType.bulkCreate(options, { ignoreDuplicates: true })
+async function ParseSetupData(link, cb) {
+  let queries = {
+    main: '.listing-detail-part',
+    stat: '.listing-detail-stat',
+    heading: '.listing-detail-heading'
+  }
+  const page = await cb(link)
+  const $ = cheerio.load(page)
+  let obj = {}
+  let raceName = $('.listing-item h1').text()
+  console.log(raceName)
+  $(queries.main).each((i, el) => {
+    let key = $(el).find(queries.heading).text().toLowerCase().trim()
+    if (key !== 'rating') {
+      let data = $(el).find(queries.stat).text().trim()
+      let objKey = key.split(' ').join('_')
+      obj[objKey] = data
+    }
+  })
+  $('.setup-part-50').each((i, el) => {
+    let column = $(el)
+      .find(queries.heading)
+      .text()
+      .split(' ')
+      .join('_')
+      .toLowerCase()
+      .replace(':', '')
+      .replace('-', '_')
+    let value = $(el).find(queries.stat).text()
+    obj[column] = parseFloat(value)
+  })
+  return obj
 }
+
 async function request(url) {
   try {
-    const res = await axios.get(
-      url || 'https://www.f1carsetup.com/index.php?/forum/453-f1-2020-setups/'
-    )
+    const res = await axios.get(url)
     return res.data
   } catch (error) {
     console.log(error.message, url)
   }
-}
-async function buildSetupOptions(options) {
-  return Promise.all(
-    options.map(async (opt) => {
-      const model = await GrandPrix.findOne({
-        where: { name: opt.grandPrix },
-        attributes: ['id'],
-        raw: true
-      })
-      if (model) {
-        return { setupType: opt.type, gpId: model.id, url: opt.link }
-      }
-    })
-  )
-}
-function selectSetupType(page) {
-  const $ = cheerio.load(page)
-  let options = $('#ipsLayout_mainArea').find(
-    $('.ipsDataItem_title .ipsType_break a')
-  )
-  let setupOptions = []
-  options.each((i, el) => {
-    let strSplit = el.attribs['title'].trim().split(' ')
-    let title = strSplit.splice(0, 3).join(' ')
-    setupOptions.push({
-      grandPrix: title,
-      link: el.attribs['href'],
-      type: strSplit[strSplit.length - 1]
-    })
-  })
-  return setupOptions
-}
-
-function scraper(page) {
-  const $ = cheerio.load(page)
-  let table = {}
-  let headers = $('.ipsForumGrid').find($('.cForumGrid__hero-image'))
-  let links = $('.ipsForumGrid').find($('.cForumGrid__hero-link'))
-  headers.each((i, el) => {
-    let header = el.attribs['aria-label'].trim()
-    if (!header.match('F2')) {
-      table[header] = {
-        grand_prix: header,
-        link: links[i].attribs['href'],
-        setups: []
-      }
-    }
-  })
-  let trackData = Object.values(table)
-  return [trackData]
 }
 
 main()

@@ -3,7 +3,7 @@ const { Model } = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
   class GrandPrix extends Model {
     static associate(models) {
-      GrandPrix.hasMany(models.SetupType, { foreignKey: 'gp_id' })
+      GrandPrix.hasMany(models.Setup, { foreignKey: 'gp_id' })
     }
   }
   GrandPrix.init(
@@ -18,6 +18,14 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         unique: true,
         allowNull: false
+      },
+      location: {
+        type: DataTypes.STRING,
+        field: 'location'
+      },
+      locationFlag: {
+        type: DataTypes.TEXT,
+        field: 'location_flag'
       }
     },
     {

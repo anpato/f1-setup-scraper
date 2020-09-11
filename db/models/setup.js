@@ -13,10 +13,6 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'gp_id',
         onDelete: 'CASCADE'
       })
-      Setup.belongsTo(models.SetupType, {
-        foreignKey: 'type_id',
-        onDelete: 'CASCADE'
-      })
       Setup.belongsTo(models.Team, {
         foreignKey: 'team_id',
         onDelete: 'CASCADE'
@@ -32,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: DataTypes.UUIDV4
       },
       raceMode: {
-        type: DataTypes.STRING,
+        type: DataTypes.ENUM(['Grand Prix', 'Time Trial']),
         allowNull: false,
         field: 'race_mode'
       },
@@ -82,41 +78,37 @@ module.exports = (sequelize, DataTypes) => {
       frontCamber: {
         type: DataTypes.DECIMAL(10, 2),
         validate: {
-          min: 1.5,
-          max: 2.5
+          min: -1.5,
+          max: -2.5
         },
         allowNull: false,
-        get: (v) => `-${v}`,
         field: 'front_camber'
       },
       rearCamber: {
         type: DataTypes.DECIMAL(10, 2),
         validate: {
-          min: 1.5,
-          max: 2.5
+          min: -1.5,
+          max: -2.5
         },
         allowNull: false,
-        get: (v) => `-${v}`,
         field: 'rear_camber'
       },
       frontToe: {
         type: DataTypes.DECIMAL(10, 2),
         validate: {
-          min: 1.5,
-          max: 2.5
+          min: 0,
+          max: 1
         },
         allowNull: false,
-        get: (v) => `-${v}`,
         field: 'front_toe'
       },
       rearToe: {
         type: DataTypes.DECIMAL(10, 2),
         validate: {
-          min: 1.5,
-          max: 2.5
+          min: 0,
+          max: 1
         },
         allowNull: false,
-        get: (v) => `-${v}`,
         field: 'rear_toe'
       },
       frontSuspension: {
@@ -233,18 +225,15 @@ module.exports = (sequelize, DataTypes) => {
         get: (v) => `${v} psi`,
         field: 'rear_left_tyre_pressure'
       },
+      conditions: {
+        type: DataTypes.ENUM(['wet', 'dry']),
+        allowNull: false,
+        field: 'conditions'
+      },
       gpId: {
         field: 'gp_id',
         references: {
           model: 'grand_prixes',
-          key: 'id'
-        },
-        type: DataTypes.UUID
-      },
-      typeId: {
-        field: 'type_id',
-        references: {
-          model: 'setup_types',
           key: 'id'
         },
         type: DataTypes.UUID
