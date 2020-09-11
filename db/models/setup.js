@@ -35,7 +35,8 @@ module.exports = (sequelize, DataTypes) => {
       lapTime: {
         type: DataTypes.STRING,
         allowNull: false,
-        field: 'lap_time'
+        field: 'lap_time',
+        unique: true
       },
       frontWing: {
         type: DataTypes.INTEGER,

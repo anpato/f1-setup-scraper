@@ -10,13 +10,13 @@ module.exports = {
       },
       raceMode: {
         type: Sequelize.STRING,
-        allowNull: false,
         field: 'race_mode'
       },
       lapTime: {
         type: Sequelize.STRING,
         allowNull: false,
-        field: 'lap_time'
+        field: 'lap_time',
+        unique: true
       },
       frontWing: {
         type: Sequelize.INTEGER,
@@ -218,7 +218,6 @@ module.exports = {
         },
         type: Sequelize.UUID
       },
-
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

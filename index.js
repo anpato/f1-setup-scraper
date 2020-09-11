@@ -28,7 +28,7 @@ async function main() {
       })
     }
   }
-  await prepareSetups(preparedSetups)
+  await prepareSetups(preparedSetupData)
   return true
 }
 

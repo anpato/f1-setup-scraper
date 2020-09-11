@@ -4,7 +4,6 @@ const { Team } = require('./db/models')
 
 async function request(url) {
   const res = await axios.get(url)
-  console.log()
   return res.data
 }
 
