@@ -17,6 +17,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'type_id',
         onDelete: 'CASCADE'
       })
+      Setup.belongsTo(models.Team, {
+        foreignKey: 'team_id',
+        onDelete: 'CASCADE'
+      })
     }
   }
   Setup.init(
@@ -243,6 +247,15 @@ module.exports = (sequelize, DataTypes) => {
           model: 'setup_types',
           key: 'id'
         },
+        type: DataTypes.UUID
+      },
+      teamId: {
+        field: 'team_id',
+        references: {
+          model: 'teams',
+          key: 'id'
+        },
+        allowNull: true,
         type: DataTypes.UUID
       }
     },
