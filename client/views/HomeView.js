@@ -1,16 +1,19 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { View, Text } from 'native-base'
 import { GetCurrentSchedule, GetQualiInfo, GetRaceResults } from '../services'
 import { useRecoilState } from 'recoil'
-import { RaceSchedule, UpComingRace } from '../store/atoms'
-import { StyleSheet, ScrollView } from 'react-native'
+import { RaceSchedule, UpComingRace, ModelStatus } from '../store/atoms'
+import { StyleSheet, ScrollView, Modal, Dimensions } from 'react-native'
 import moment from 'moment'
+import Panel from 'react-native-sliding-up-down-panels'
 import { TouchableCard } from '../shared'
 import {
   SetQualifyingResults,
   SetRaceResults
 } from '../store/selectors/RaceSelectors'
 import { useNavigation } from '@react-navigation/native'
+import ResultView from './ResultView'
+import { TouchableOpacity } from 'react-native-gesture-handler'
 
 export default HomeView = () => {
   const navigation = useNavigation()
@@ -18,6 +21,7 @@ export default HomeView = () => {
   const [upcoming, setUpComing] = useRecoilState(UpComingRace)
   const [qR, setQualiResults] = useRecoilState(SetQualifyingResults)
   const [rR, setRaceResults] = useRecoilState(SetRaceResults)
+  const [modalStatus, toggleModal] = useRecoilState(ModelStatus)
   useEffect(() => {
     async function getSched() {
       const { raceData, upcoming } = await GetCurrentSchedule()
@@ -39,43 +43,69 @@ export default HomeView = () => {
       </TouchableCard>
     ))
 
+  const toggle = () => {
+    toggleModal(false)
+  }
+
   const handleSelectRace = async (round) => {
     let qinfo = await GetQualiInfo(round)
     let rInfo = await GetRaceResults(round)
     setQualiResults(qinfo)
     setRaceResults(rInfo)
-    navigation.push('Results')
+    toggleModal(true)
   }
-
+  console.log(modalStatus)
   return (
-    <ScrollView Style={styles.container}>
-      {upcoming && schedule.length ? (
-        <View>
+    <View style={{ flex: 1 }}>
+      <ScrollView Style={styles.container}>
+        {upcoming && schedule.length ? (
           <View>
-            <View style={styles.header}>
-              <Text style={styles.headerText}>Upcoming Race</Text>
-            </View>
-            <TouchableCard
-              styles={styles.cardItem}
-              onPress={() => handleSelectRace(upcoming.round)}
-            >
-              <Text style={styles.cardHeader}>{upcoming.raceName}</Text>
-              <Text>{upcoming.circuitName}</Text>
+            <View>
+              <View style={styles.header}>
+                <Text style={styles.headerText}>Upcoming Race</Text>
+              </View>
+              <TouchableCard
+                styles={styles.cardItem}
+                onPress={() => handleSelectRace(upcoming.round)}
+              >
+                <Text style={styles.cardHeader}>{upcoming.raceName}</Text>
+                <Text>{upcoming.circuitName}</Text>
 
-              <Text>
-                {moment(upcoming.raceDate).format('dddd, MMMM Do YYYY, h:mm a')}
-              </Text>
-            </TouchableCard>
-          </View>
-          <View>
-            <View style={styles.header}>
-              <Text style={styles.headerText}>Race Schedule</Text>
+                <Text>
+                  {moment(upcoming.raceDate).format(
+                    'dddd, MMMM Do YYYY, h:mm a'
+                  )}
+                </Text>
+              </TouchableCard>
             </View>
-            {renderItem(schedule)}
+            <View>
+              <View style={styles.header}>
+                <Text style={styles.headerText}>Race Schedule</Text>
+              </View>
+              {renderItem(schedule)}
+            </View>
           </View>
+        ) : null}
+      </ScrollView>
+      <Modal
+        visible={modalStatus && modalStatus}
+        onRequestClose={toggle}
+        animationType="slide"
+      >
+        <View
+          style={{
+            borderTopRightRadius: 20,
+            height: Dimensions.get('window').height - 200,
+            borderWidth: 2
+          }}
+        >
+          <TouchableOpacity onPress={toggle} style={{ width: '100%' }}>
+            <Text>Close</Text>
+          </TouchableOpacity>
+          <ResultView />
         </View>
-      ) : null}
-    </ScrollView>
+      </Modal>
+    </View>
   )
 }
 
