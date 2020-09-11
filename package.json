@@ -1,13 +1,19 @@
 {
-  "name": "f1-scraper",
-  "version": "1.0.0",
-  "main": "index.js",
-  "license": "MIT",
+  "name": "my-app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
   "dependencies": {
     "axios": "^0.20.0",
     "cheerio": "^1.0.0-rc.3",
+    "next": "9.5.3",
     "pg": "^8.3.3",
-    "sequelize": "^6.3.5",
-    "slugify": "^1.4.5"
+    "react": "16.13.1",
+    "react-dom": "16.13.1",
+    "sequelize": "^6.3.5"
   }
 }

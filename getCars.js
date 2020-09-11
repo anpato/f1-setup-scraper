@@ -1,6 +1,6 @@
 const axios = require('axios')
 const cheerio = require('cheerio')
-const { Team } = require('./models')
+const { Team } = require('./db/models')
 
 async function request(url) {
   const res = await axios.get(url)
@@ -27,6 +27,7 @@ async function getImages(data) {
       teamCar
     })
   })
+  console.log(teamData)
   await Team.bulkCreate(teamData)
 }
 
@@ -35,4 +36,4 @@ async function main() {
   let results = await request('https://www.formula1.com/en/teams.html')
   await getImages(results)
 }
-// main()
+main()
