@@ -1,6 +1,5 @@
 const axios = require('axios')
 const cheerio = require('cheerio')
-const { Team } = require('../db/models')
 
 async function request(url) {
   const res = await axios.get(url)
@@ -10,6 +9,7 @@ async function request(url) {
 async function getImages(data) {
   const $ = cheerio.load(data)
   let teamData = []
+  let defaultTeam = { teamName: 'Multiplayer' }
   $('.col-12.col-md-6').each((i, el) => {
     let teamName = $(el).find($('.f1-color--black')).text()
     let teamLogo = $(el).find($('.logo picture img'))[0].attribs['data-src']
@@ -26,19 +26,14 @@ async function getImages(data) {
       teamCar
     })
   })
-  let default = {
-    teamName: 'Multiplayer'
-  }
-  let teams = {
-    ...teamData, 
-    ...default
-  }
+  let teams = [...teamData, defaultTeam]
   return teams
 }
 
 async function main() {
   let results = await request('https://www.formula1.com/en/teams.html')
- const teams =  await getImages(results)
- return teams
+  const teams = await getImages(results)
+  return teams
 }
+
 module.exports = main

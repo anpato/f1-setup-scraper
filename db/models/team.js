@@ -21,7 +21,8 @@ module.exports = (sequelize, DataTypes) => {
       },
       teamName: {
         type: DataTypes.STRING,
-        field: 'team_name'
+        field: 'team_name',
+        unique: true
       },
       teamCar: {
         type: DataTypes.TEXT,

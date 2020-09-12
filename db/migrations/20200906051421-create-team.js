@@ -10,6 +10,7 @@ module.exports = {
       },
       teamName: {
         type: Sequelize.STRING,
+        unique: true,
         field: 'team_name'
       },
       teamCar: {

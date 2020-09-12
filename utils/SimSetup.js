@@ -25,8 +25,7 @@ async function main() {
       })
     }
   }
-  await prepareSetups(preparedSetupData)
-  return true
+  return await prepareSetups(preparedSetupData)
 }
 
 async function prepareSetups(data) {
@@ -58,7 +57,7 @@ async function prepareSetups(data) {
       return { ...d.data, gpId: gp.id, teamId: team.id, conditions: d.type }
     })
   )
-  await Setup.bulkCreate(setups, { ignoreDuplicates: true })
+  return setups
 }
 
 function capitalize(word) {
@@ -177,4 +176,4 @@ async function request(url) {
   }
 }
 
-main()
+module.exports = main
