@@ -1,6 +1,7 @@
 const Express = require('express')
 const dependencies = require('./dependencies')
 const { node_env, port } = require('./env')
+const { verifyOrigin } = require('./middleware')
 const Router = require('./routes')
 
 class Server {
@@ -11,10 +12,11 @@ class Server {
   }
   initCache() {}
   initMiddleware() {
+    this.app.disable('x-powered-by')
     this.middleware.forEach((m) => this.app.use(m))
   }
   initRoutes() {
-    this.app.use('/api', Router)
+    this.app.use('/api', verifyOrigin, Router)
   }
   listen() {
     this.app.listen(this.port, () =>
