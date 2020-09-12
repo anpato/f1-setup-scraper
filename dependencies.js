@@ -1,5 +1,5 @@
 module.exports = [
-  require('cors')({ origin: 'http://localhost:3000' }),
+  require('cors')(),
   require('morgan')('dev'),
   require('compression')(),
   require('body-parser').urlencoded({ extended: true }),

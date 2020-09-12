@@ -63,7 +63,9 @@ module.exports = (sequelize, DataTypes) => {
           max: 100
         },
         allowNull: false,
-        get: (v) => `${v}%`,
+        get(c) {
+          return `${this.getDataValue(c)} %`
+        },
         field: 'differential_adjustment_on_throttle'
       },
       differentialAdjustmentOffThrottle: {
@@ -73,7 +75,9 @@ module.exports = (sequelize, DataTypes) => {
           max: 100
         },
         allowNull: false,
-        get: (v) => `${v}%`,
+        get(c) {
+          return `${this.getDataValue(c)} %`
+        },
         field: 'differential_adjustment_off_throttle'
       },
       frontCamber: {
@@ -173,7 +177,9 @@ module.exports = (sequelize, DataTypes) => {
           max: 100
         },
         allowNull: false,
-        get: (v) => `${v}%`,
+        get(c) {
+          return `${this.getDataValue(c)} %`
+        },
         field: 'brake_pressure'
       },
       frontBrakeBias: {
@@ -183,7 +189,9 @@ module.exports = (sequelize, DataTypes) => {
           max: 100
         },
         allowNull: false,
-        get: (v) => `${v}%`,
+        get(c) {
+          return `${this.getDataValue(c)} %`
+        },
         field: 'front_brake_bias'
       },
       frontRightTyrePressure: {
@@ -193,7 +201,9 @@ module.exports = (sequelize, DataTypes) => {
           max: 25.0
         },
         allowNull: false,
-        get: (v) => `${v} psi`,
+        get(c) {
+          return `${this.getDataValue(c)} psi`
+        },
         field: 'front_right_tyre_pressure'
       },
       frontLeftTyrePressure: {
@@ -203,7 +213,9 @@ module.exports = (sequelize, DataTypes) => {
           max: 25.0
         },
         allowNull: false,
-        get: (v) => `${v} psi`,
+        get(c) {
+          return `${this.getDataValue(c)} psi`
+        },
         field: 'front_left_tyre_pressure'
       },
       rearRightTyrePressure: {
@@ -213,7 +225,9 @@ module.exports = (sequelize, DataTypes) => {
           max: 23.5
         },
         allowNull: false,
-        get: (v) => `${v} psi`,
+        get(c) {
+          return `${this.getDataValue(c)} psi`
+        },
         field: 'rear_right_tyre_pressure'
       },
       rearLeftTyrePressure: {
@@ -223,7 +237,9 @@ module.exports = (sequelize, DataTypes) => {
           max: 23.5
         },
         allowNull: false,
-        get: (v) => `${v} psi`,
+        get(c) {
+          return `${this.getDataValue(c)} psi`
+        },
         field: 'rear_left_tyre_pressure'
       },
       conditions: {

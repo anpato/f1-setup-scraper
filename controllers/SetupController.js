@@ -8,7 +8,7 @@ module.exports = {
         where: conditions
           ? { [Op.and]: [{ [query]: value }, { conditions }] }
           : { [query]: value },
-        attributes: ['id', 'lapTime', 'raceMode'],
+        attributes: ['id', 'lapTime', 'raceMode', 'conditions'],
         include: [{ model: Team }]
       })
       res.send(setups)
@@ -18,7 +18,13 @@ module.exports = {
   },
   getSetupById: async (req, res) => {
     try {
-      const setup = await Setup.findByPk(req.params.setup_id)
+      const setup = await Setup.findByPk(req.params.setup_id, {
+        attributes: {
+          exclude: ['gp_id', 'gpId', 'updatedAt', 'team_id', 'teamId']
+        },
+        raw: false
+      })
+      console.log(setup)
       res.send(setup)
     } catch (error) {
       throw error
