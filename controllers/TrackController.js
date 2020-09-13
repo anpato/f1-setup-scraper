@@ -20,7 +20,6 @@ module.exports = {
   listSetups: async (req, res) => {
     try {
       const { query, value } = req.query
-      console.log(query, value)
       const setups = await Setup.findAll({
         where: { [query]: value },
         attributes: ['id', 'lapTime', 'raceMode', 'conditions'],

@@ -24,7 +24,6 @@ module.exports = {
         },
         raw: false
       })
-      console.log(setup)
       res.send(setup)
     } catch (error) {
       throw error
