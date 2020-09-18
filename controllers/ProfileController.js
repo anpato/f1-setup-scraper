@@ -1,6 +1,19 @@
 const { User, Setup, UserFavorite, GrandPrix, Team } = require('../db/models')
 
 module.exports = {
+  getProfile: async ({ query }, res, next) => {
+    try {
+      const profile = await User.findByPk(query.user, {
+        include: [
+          { model: Setup, as: 'authored', include: [GrandPrix, Team] },
+          { model: Setup, as: 'favorites' }
+        ]
+      })
+      res.send(profile)
+    } catch (error) {
+      throw error
+    }
+  },
   favoriteSetup: async ({ query }, res, next) => {
     try {
       const favorite = await UserFavorite.create({
