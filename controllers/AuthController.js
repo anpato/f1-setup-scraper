@@ -24,7 +24,7 @@ module.exports = {
         const token = assignToken({ id, name })
         return res.send({
           token,
-          name: user.name
+          user: { name: user.name, id: user.id }
         })
       }
       res.status(401).json({ msg: 'Unauthorized' })
