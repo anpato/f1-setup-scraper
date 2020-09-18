@@ -4,7 +4,6 @@ const { app_secret, salt_rounds } = require('../env')
 const crypto = require('crypto')
 module.exports = {
   verifyOrigin: (req, res, next) => {
-    console.log(req.headers)
     if (!req.headers.referer && req.headers.referer !== 'http://localhost:8080')
       return res.status(403).json({ msg: 'Unauthorized' })
     res.header('Access-Control-Allow-Origin', 'http://localhost:8080')
@@ -13,7 +12,7 @@ module.exports = {
       'Access-Control-Allow-Headers',
       'Origin, X-Requested-With, Content-Type, Accept'
     )
-    req.next()
+    next()
   },
   verifyPassword: async (iP, cP) => await bcrypt.compare(iP, cP),
   getToken: (req, res, next) => {
