@@ -17,6 +17,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'team_id',
         onDelete: 'CASCADE'
       })
+      Setup.belongsTo(models.User, {
+        as: 'author',
+        foreignKey: 'author_id'
+      })
     }
   }
   Setup.init(

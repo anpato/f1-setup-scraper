@@ -1,5 +1,4 @@
 const { User } = require('../db/models')
-const jwt = require('jsonwebtoken')
 const {
   hashPassword,
   assignToken,
@@ -34,12 +33,13 @@ module.exports = {
   },
   register: async ({ body }, res) => {
     try {
-      const { name, email, password } = body
+      const { name, email, password, displayName } = body
       const passwordDigest = await hashPassword(password)
       const firstToken = genAuthToken()
       await User.create({
         name,
         email,
+        displayName,
         passwordDigest,
         signUpToken: firstToken
       })

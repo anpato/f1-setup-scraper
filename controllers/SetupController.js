@@ -1,5 +1,5 @@
 const { Op } = require('sequelize')
-const { Setup, Team } = require('../db/models')
+const { Setup, Team, UserFavorite, User } = require('../db/models')
 module.exports = {
   getSetups: async (req, res) => {
     try {
@@ -22,6 +22,7 @@ module.exports = {
         attributes: {
           exclude: ['gp_id', 'gpId', 'updatedAt', 'team_id', 'teamId']
         },
+        include: [{ model: User, as: 'author', attributes: ['displayName'] }],
         raw: false
       })
       res.send(setup)

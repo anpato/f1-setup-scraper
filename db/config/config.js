@@ -2,8 +2,8 @@ module.exports = {
   development: {
     database: 'f1_development',
     host: '127.0.0.1',
-    dialect: 'postgres',
-    logging: false
+    dialect: 'postgres'
+    // logging: true
   },
   test: {
     username: 'root',
