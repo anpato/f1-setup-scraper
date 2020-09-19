@@ -17,15 +17,14 @@ module.exports = {
   verifyPassword: async (iP, cP) => await bcrypt.compare(iP, cP),
   getToken: (req, res, next) => {
     const token = req.headers.authorization.split(' ')[1]
-    this.verifyToken(token)
-    res.locals.token = token
-
-    next()
+    if (token) {
+      res.locals.token = token
+      return next()
+    }
+    return res.status(401).json({ msg: 'Unauthorized' })
   },
   hashPassword: async (uP) => await bcrypt.hash(uP, salt_rounds),
-  verifyToken: (token) => {
-    return jwt.verify(token, app_secret)
-  },
+  verifyToken: (token) => jwt.verify(token, app_secret),
   assignToken: (payload) => jwt.sign(payload, app_secret, { expiresIn: '4h' }),
   genAuthToken: () => crypto.randomBytes(20).toString('hex'),
   verifyActive: (user) => user.isActive

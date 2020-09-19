@@ -21,6 +21,11 @@ module.exports = (sequelize, DataTypes) => {
         as: 'author',
         foreignKey: 'author_id'
       })
+      Setup.belongsToMany(models.User, {
+        through: 'user_favorites',
+        as: 'favorites',
+        foreignKey: 'setup_id'
+      })
     }
   }
   Setup.init(

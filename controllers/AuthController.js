@@ -4,7 +4,8 @@ const {
   assignToken,
   verifyPassword,
   genAuthToken,
-  verifyActive
+  verifyActive,
+  verifyToken
 } = require('../middleware')
 
 module.exports = {
@@ -67,6 +68,17 @@ module.exports = {
       res.status(401).json({ msg: 'Unauthorized' })
     } catch (error) {
       throw error
+    }
+  },
+  verifyTokenValid: async (req, res, next) => {
+    try {
+      res.locals.token
+      if (verifyToken(res.locals.token)) {
+        return res.send({ msg: 'Token Valid' })
+      }
+      return res.status(401).json({ msg: 'Unauthorized' })
+    } catch (error) {
+      res.status(401).json({ msg: 'Unauthorized' })
     }
   }
 }

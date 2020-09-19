@@ -1,5 +1,5 @@
 const { Op } = require('sequelize')
-const { Setup, Team, UserFavorite, User } = require('../db/models')
+const { Setup, Team, User } = require('../db/models')
 module.exports = {
   getSetups: async (req, res) => {
     try {

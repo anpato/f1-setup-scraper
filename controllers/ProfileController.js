@@ -4,8 +4,9 @@ module.exports = {
   getProfile: async ({ query }, res, next) => {
     try {
       const profile = await User.findByPk(query.user, {
+        attributes: ['id', 'displayName', 'isActive'],
         include: [
-          { model: Setup, as: 'authored', include: [GrandPrix, Team] },
+          { model: Setup, as: 'authored_setups', include: [GrandPrix, Team] },
           { model: Setup, as: 'favorites' }
         ]
       })

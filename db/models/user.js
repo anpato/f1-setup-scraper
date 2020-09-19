@@ -4,7 +4,10 @@ module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     static associate(models) {
       // define association here
-      User.hasMany(models.Setup, { as: 'author', foreignKey: 'author_id' })
+      User.hasMany(models.Setup, {
+        as: 'authored_setups',
+        foreignKey: 'author_id'
+      })
       User.belongsToMany(models.Setup, {
         as: 'favorites',
         through: 'user_favorites',
