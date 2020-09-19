@@ -25,6 +25,7 @@ module.exports = {
   },
   hashPassword: async (uP) => await bcrypt.hash(uP, salt_rounds),
   verifyToken: (token) => jwt.verify(token, app_secret),
+  decodeToken: (token) => jwt.decode(token, app_secret),
   assignToken: (payload) => jwt.sign(payload, app_secret, { expiresIn: '4h' }),
   genAuthToken: () => crypto.randomBytes(20).toString('hex'),
   verifyActive: (user) => user.isActive

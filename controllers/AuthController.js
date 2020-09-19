@@ -5,7 +5,8 @@ const {
   verifyPassword,
   genAuthToken,
   verifyActive,
-  verifyToken
+  verifyToken,
+  decodeToken
 } = require('../middleware')
 
 module.exports = {
@@ -20,8 +21,8 @@ module.exports = {
         (await verifyPassword(body.password, user.passwordDigest)) &&
         verifyActive(user)
       ) {
-        const { id, name } = user
-        const token = assignToken({ id, name })
+        const { id, displayName } = user
+        const token = assignToken({ id, displayName })
         return res.send({
           token,
           user: { name: user.name, id: user.id }
@@ -74,7 +75,8 @@ module.exports = {
     try {
       res.locals.token
       if (verifyToken(res.locals.token)) {
-        return res.send({ msg: 'Token Valid' })
+        const user = decodeToken(res.locals.token)
+        return res.send({ msg: 'Token Valid', user })
       }
       return res.status(401).json({ msg: 'Unauthorized' })
     } catch (error) {
